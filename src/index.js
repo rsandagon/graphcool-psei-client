@@ -13,7 +13,7 @@ import { ApolloLink } from "apollo-link";
 import { withClientState } from "apollo-link-state";
 import { createHttpLink } from "apollo-link-http";
 import { CachePersistor } from "apollo-cache-persist";
-import { defaults, resolvers } from "./graphql/UI";
+import { defaults, resolvers } from "./graphql/ui";
 
 const cache = new InMemoryCache({
   logger: console.log,

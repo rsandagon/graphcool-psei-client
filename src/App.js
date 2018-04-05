@@ -1,9 +1,10 @@
 import React from "react";
 import { Query } from "react-apollo";
-import Dropdown from "react-dropdown";
 import StockDetails from "./container/StockDetails";
+import FilterMenu from "./container/FilterMenu";
 
 import ALL_LATEST_STOCKS from "./graphql/stocks/ALL_LATEST_STOCKS";
+import GET_APP_STATE from "./graphql/ui/GET_APP_STATE";
 
 class App extends React.Component {
   state = {};
@@ -23,14 +24,14 @@ class App extends React.Component {
     this.setState({ filter: selection.value });
   }
 
-  _sortList = list => {
+  _sortList(filter, list) {
     //very crude filtering
     let filterList = [];
-    if (this.state.filter === "Winners") {
+    if (filter === "Winners") {
       filterList = list.sort((a, b) => {
         return b.percent_change - a.percent_change;
       });
-    } else if (this.state.filter === "Losers") {
+    } else if (filter === "Losers") {
       filterList = list.sort((a, b) => {
         return a.percent_change - b.percent_change;
       });
@@ -38,7 +39,7 @@ class App extends React.Component {
       filterList = list;
     }
     return filterList;
-  };
+  }
   render() {
     const loadingScreen = (
       <article className="vh-100 dt w-100">
@@ -91,8 +92,6 @@ class App extends React.Component {
       </div>
     );
 
-    const options = ["All", "Winners", "Losers"];
-    const defaultOption = options[0];
     const renderHeader = (
       <article key="header">
         <header className="bg-green sans-serif">
@@ -111,17 +110,6 @@ class App extends React.Component {
         </header>
       </article>
     );
-    const renderMenu = (
-      <div className="cf">
-        <Dropdown
-          className="fl w-20 mb3"
-          options={options}
-          onChange={this._onSelect}
-          value={defaultOption}
-          placeholder="Select an option"
-        />
-      </div>
-    );
 
     const renderDate = (
       <h3 className="f6 ttu tracked">
@@ -130,40 +118,56 @@ class App extends React.Component {
     );
 
     return (
-      <Query query={ALL_LATEST_STOCKS} pollInterval={10000}>
+      <Query query={GET_APP_STATE}>
         {({ loading, error, data }) => {
-          let filteredList = [];
+          let filter = "All";
 
-          if (loading && this.firstTime) return loadingScreen;
-          if (error) return errorDiv;
-          if (data) {
-            if (!data.allLatestStocks) {
-              return errorDiv;
-            }
-
-            this.firstTime = false;
-            filteredList = this._sortList(data.allLatestStocks.list.slice());
+          if (data.appState) {
+            filter = data.appState.filter;
           }
 
           return [
-            renderHeader,
-            <article
-              className="helvetica pa3 pa5-ns"
-              data-name="slab-stat-small"
-              key="content"
+            <Query
+              query={ALL_LATEST_STOCKS}
+              pollInterval={10000}
+              key="query-latest-stocks"
             >
-              {renderMenu}
-              {renderDate}
-              {tableHeader}
-              {filteredList.map((stock, index) => {
-                return (
-                  <StockDetails
-                    stock={stock}
-                    key={`stock_${this.props.index}`}
-                  />
-                );
-              })}
-            </article>
+              {({ loading, error, data }) => {
+                let filteredList = [];
+
+                if (loading && this.firstTime) return loadingScreen;
+                if (error) return errorDiv;
+                if (data) {
+                  if (!data.allLatestStocks) {
+                    return errorDiv;
+                  }
+
+                  this.firstTime = false;
+                  filteredList = this._sortList(
+                    filter,
+                    data.allLatestStocks.list.slice()
+                  );
+                }
+
+                return [
+                  renderHeader,
+                  <article
+                    className="helvetica pa3 pa5-ns"
+                    data-name="slab-stat-small"
+                    key="content"
+                  >
+                    <FilterMenu />
+                    {renderDate}
+                    {tableHeader}
+                    {filteredList.map((stock, index) => {
+                      return (
+                        <StockDetails stock={stock} key={`stock_${index}`} />
+                      );
+                    })}
+                  </article>
+                ];
+              }}
+            </Query>
           ];
         }}
       </Query>
