@@ -2,7 +2,7 @@
 
 ## Quick Start
 
-[![Edit reactstrap-apollo-template](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/rsandagon/reactstrap-apollo-template/tree/master/)
+[![Edit reactstrap-apollo-template](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/rsandagon/graphcool-psei-client/tree/master/)
 
 1. Clone this repo using `git clone [git-repot-path]`
 1. Run `npm install` to install dependencies and clean the git repo.<br />
