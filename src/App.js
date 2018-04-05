@@ -69,6 +69,11 @@ class App extends React.Component {
           if (error) return errorDiv;
           if (data) {
             console.log('data:', data)
+
+            if(!data.allLatestStocks){
+              return errorDiv;
+            }
+            
             list = data.allLatestStocks.list
           }
 
