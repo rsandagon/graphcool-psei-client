@@ -23,7 +23,7 @@ class App extends React.Component {
         <title>info icon</title>
         <path d="M16 0 A16 16 0 0 1 16 32 A16 16 0 0 1 16 0 M19 15 L13 15 L13 26 L19 26 z M16 6 A3 3 0 0 0 16 12 A3 3 0 0 0 16 6"></path>
       </svg>
-      <span className="lh-title ml3">Query failed!</span>
+      <span className="lh-title ml3">Query failed! Page will refresh in 5 seconds, or you may refresh it manually.</span>
     </div>)
 
     const header = (<div className="cf b--black-40 bb">
@@ -73,7 +73,7 @@ class App extends React.Component {
             if(!data.allLatestStocks){
               return errorDiv;
             }
-            
+
             list = data.allLatestStocks.list
           }
 
