@@ -1,6 +1,7 @@
 import React from "react";
 import { Query } from "react-apollo";
 import Dropdown from "react-dropdown";
+import StockDetails from "./container/StockDetails";
 
 import ALL_LATEST_STOCKS from "./graphql/stocks/ALL_LATEST_STOCKS";
 
@@ -90,34 +91,6 @@ class App extends React.Component {
       </div>
     );
 
-    const downArrow = (
-      <svg
-        className="w1 mr2"
-        style={{ fill: "currentcolor" }}
-        width="16"
-        height="16"
-        viewBox="0 0 128 128"
-      >
-        <title />
-        <g id="icomoon-ignore" />
-        <path d="M109.657 77.657l-40 40c-3.124 3.124-8.189 3.124-11.313 0l-40-40c-3.124-3.124-3.124-8.189 0-11.314s8.19-3.124 11.314 0l26.343 26.343v-76.686c0-4.418 3.582-8 8-8s8 3.582 8 8v76.686l26.343-26.343c1.562-1.562 3.609-2.343 5.657-2.343s4.095 0.781 5.657 2.343c3.124 3.124 3.124 8.189 0 11.314z" />
-      </svg>
-    );
-
-    const upArrow = (
-      <svg
-        className="w1 mr2"
-        style={{ fill: "currentcolor" }}
-        width="16"
-        height="16"
-        viewBox="0 0 128 128"
-      >
-        <title />
-        <g id="icomoon-ignore" />
-        <path d="M109.657 50.343l-40-40c-3.124-3.124-8.189-3.124-11.313 0l-40 40c-3.124 3.124-3.124 8.19 0 11.314s8.19 3.124 11.314 0l26.343-26.343v76.686c0 4.418 3.582 8 8 8s8-3.582 8-8v-76.686l26.343 26.343c1.562 1.562 3.609 2.343 5.657 2.343s4.095-0.781 5.657-2.343c3.124-3.124 3.124-8.189 0-11.313z" />
-      </svg>
-    );
-
     const options = ["All", "Winners", "Losers"];
     const defaultOption = options[0];
     const renderHeader = (
@@ -150,10 +123,15 @@ class App extends React.Component {
       </div>
     );
 
+    const renderDate = (
+      <h3 className="f6 ttu tracked">
+        Today: {new Date().toLocaleDateString()}
+      </h3>
+    );
+
     return (
       <Query query={ALL_LATEST_STOCKS} pollInterval={10000}>
         {({ loading, error, data }) => {
-          let list = [];
           let filteredList = [];
 
           if (loading && this.firstTime) return loadingScreen;
@@ -164,8 +142,7 @@ class App extends React.Component {
             }
 
             this.firstTime = false;
-            list = data.allLatestStocks.list;
-            filteredList = this._sortList(list.slice());
+            filteredList = this._sortList(data.allLatestStocks.list.slice());
           }
 
           return [
@@ -176,37 +153,14 @@ class App extends React.Component {
               key="content"
             >
               {renderMenu}
-              <h3 className="f6 ttu tracked">
-                Today: {new Date().toLocaleDateString()}
-              </h3>
+              {renderDate}
               {tableHeader}
               {filteredList.map((stock, index) => {
                 return (
-                  <div
-                    className={`cf b--black-40 bb ${
-                      stock.percent_change < 0 ? "dark-red" : "green"
-                    }`}
-                    key={`stock_${index}`}
-                  >
-                    <dl className="fl w-20">
-                      <dd className="f4 fw2 ml0">{stock.symbol}</dd>
-                    </dl>
-                    <dl className="fl w-20">
-                      <dd className="f4 fw2 ml0">{stock.name}</dd>
-                    </dl>
-                    <dl className="fl w-20">
-                      <dd className={`f4 fw2 ml0 `}>
-                        {stock.percent_change < 0 ? downArrow : upArrow}
-                        {stock.percent_change}
-                      </dd>
-                    </dl>
-                    <dl className="fl w-20">
-                      <dd className="f4 fw2 ml0">{stock.price}</dd>
-                    </dl>
-                    <dl className="fl w-20">
-                      <dd className="f4 fw2 ml0">{stock.volume}</dd>
-                    </dl>
-                  </div>
+                  <StockDetails
+                    stock={stock}
+                    key={`stock_${this.props.index}`}
+                  />
                 );
               })}
             </article>
