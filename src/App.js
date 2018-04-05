@@ -6,6 +6,7 @@ import ALL_LATEST_STOCKS from "./graphql/stocks/ALL_LATEST_STOCKS";
 
 class App extends React.Component {
   state = {};
+  firstTime = true;
 
   constructor(props) {
     super(props);
@@ -38,7 +39,7 @@ class App extends React.Component {
     return filterList;
   };
   render() {
-    const loadingDiv = (
+    const loadingScreen = (
       <article className="vh-100 dt w-100">
         <div className="dtc v-mid tc white ph3 ph4-l">
           <blockquote className="athelas ml0 mt0 pl4 black-90 bl bw2 b--blue">
@@ -69,7 +70,7 @@ class App extends React.Component {
       </div>
     );
 
-    const header = (
+    const tableHeader = (
       <div className="cf b--black-40 bb">
         <dl className="fl w-20">
           <dd className="f6 fw4 ml0">Symbol</dd>
@@ -119,58 +120,66 @@ class App extends React.Component {
 
     const options = ["All", "Winners", "Losers"];
     const defaultOption = options[0];
+    const renderHeader = (
+      <article key="header">
+        <header className="bg-green sans-serif">
+          <div className="mw9 center pa4 pt5-ns ph7-l">
+            <h4 className="f2 f1-m f-headline-l measure-narrow lh-title mv0">
+              <span className="lh-copy white pa1 tracked-tight">
+                PSEi Client
+              </span>
+            </h4>
+            <h4 className="f3 fw1 georgia i">
+              {" "}
+              Just a simple client for watching the stock market
+            </h4>
+            <h5 className="f6 ttu tracked black-80">By Ryan Sandagon</h5>
+          </div>
+        </header>
+      </article>
+    );
+    const renderMenu = (
+      <div className="cf">
+        <Dropdown
+          className="fl w-20 mb3"
+          options={options}
+          onChange={this._onSelect}
+          value={defaultOption}
+          placeholder="Select an option"
+        />
+      </div>
+    );
 
     return (
-      <Query query={ALL_LATEST_STOCKS} pollInterval={5000}>
+      <Query query={ALL_LATEST_STOCKS} pollInterval={10000}>
         {({ loading, error, data }) => {
           let list = [];
           let filteredList = [];
 
-          if (loading) return loadingDiv;
+          if (loading && this.firstTime) return loadingScreen;
           if (error) return errorDiv;
           if (data) {
             if (!data.allLatestStocks) {
               return errorDiv;
             }
+
+            this.firstTime = false;
             list = data.allLatestStocks.list;
             filteredList = this._sortList(list.slice());
           }
 
           return [
-            <article key="header">
-              <header className="bg-green sans-serif">
-                <div className="mw9 center pa4 pt5-ns ph7-l">
-                  <h4 className="f2 f1-m f-headline-l measure-narrow lh-title mv0">
-                    <span className="lh-copy white pa1 tracked-tight">
-                      PSEi Client
-                    </span>
-                  </h4>
-                  <h4 className="f3 fw1 georgia i">
-                    {" "}
-                    Just a simple client for watching the stock market
-                  </h4>
-                  <h5 className="f6 ttu tracked black-80">By Ryan Sandagon</h5>
-                </div>
-              </header>
-            </article>,
+            renderHeader,
             <article
               className="helvetica pa3 pa5-ns"
               data-name="slab-stat-small"
               key="content"
             >
-              <div className="cf bb b--black">
-                <Dropdown
-                  className="fl w-20 mb3"
-                  options={options}
-                  onChange={this._onSelect}
-                  value={defaultOption}
-                  placeholder="Select an option"
-                />
-              </div>
+              {renderMenu}
               <h3 className="f6 ttu tracked">
                 Today: {new Date().toLocaleDateString()}
               </h3>
-              {header}
+              {tableHeader}
               {filteredList.map((stock, index) => {
                 return (
                   <div
