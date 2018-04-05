@@ -1,14 +1,48 @@
 import React from "react";
 import { Query } from "react-apollo";
+import Dropdown from "react-dropdown";
+
 import ALL_LATEST_STOCKS from "./graphql/stocks/ALL_LATEST_STOCKS";
 
 class App extends React.Component {
+  state = {};
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      filter: "All"
+    };
+
+    this._onSelect = this._onSelect.bind(this);
+    this._sortList = this._sortList.bind(this);
+  }
+
+  _onSelect(selection) {
+    this.setState({ filter: selection.value });
+  }
+
+  _sortList = list => {
+    //very crude filtering
+    let filterList = [];
+    if (this.state.filter === "Winners") {
+      filterList = list.sort((a, b) => {
+        return b.percent_change - a.percent_change;
+      });
+    } else if (this.state.filter === "Losers") {
+      filterList = list.sort((a, b) => {
+        return a.percent_change - b.percent_change;
+      });
+    } else {
+      filterList = list;
+    }
+    return filterList;
+  };
   render() {
     const loadingDiv = (
       <article className="vh-100 dt w-100">
         <div className="dtc v-mid tc white ph3 ph4-l">
           <blockquote className="athelas ml0 mt0 pl4 black-90 bl bw2 b--blue">
-            <p className="f6 f2-m f-subheadline-l fw6 tc  f3-l ">
+            <p className="f6 f2-m f-subheadline-l fw2 tc  f3-l ">
               Rule No.1: Never lose money. Rule No.2: Never forget rule No.1.
             </p>
             <cite className="f6 ttu tracked fs-normal">―Warren Buffet</cite>
@@ -83,21 +117,23 @@ class App extends React.Component {
       </svg>
     );
 
+    const options = ["All", "Winners", "Losers"];
+    const defaultOption = options[0];
+
     return (
       <Query query={ALL_LATEST_STOCKS} pollInterval={5000}>
         {({ loading, error, data }) => {
           let list = [];
+          let filteredList = [];
 
           if (loading) return loadingDiv;
           if (error) return errorDiv;
           if (data) {
-            console.log("data:", data);
-
             if (!data.allLatestStocks) {
               return errorDiv;
             }
-
             list = data.allLatestStocks.list;
+            filteredList = this._sortList(list.slice());
           }
 
           return [
@@ -111,7 +147,7 @@ class App extends React.Component {
                   </h4>
                   <h4 className="f3 fw1 georgia i">
                     {" "}
-                    Just simple client for watching the stock market
+                    Just a simple client for watching the stock market
                   </h4>
                   <h5 className="f6 ttu tracked black-80">By Ryan Sandagon</h5>
                 </div>
@@ -122,11 +158,20 @@ class App extends React.Component {
               data-name="slab-stat-small"
               key="content"
             >
+              <div className="cf bb b--black">
+                <Dropdown
+                  className="fl w-20 mb3"
+                  options={options}
+                  onChange={this._onSelect}
+                  value={defaultOption}
+                  placeholder="Select an option"
+                />
+              </div>
               <h3 className="f6 ttu tracked">
                 Today: {new Date().toLocaleDateString()}
               </h3>
               {header}
-              {list.map((stock, index) => {
+              {filteredList.map((stock, index) => {
                 return (
                   <div
                     className={`cf b--black-40 bb ${
@@ -134,23 +179,23 @@ class App extends React.Component {
                     }`}
                     key={`stock_${index}`}
                   >
-                    <dl className="fm w-20">
-                      <dd className="f3 fw6 ml0">{stock.symbol}</dd>
+                    <dl className="fl w-20">
+                      <dd className="f4 fw2 ml0">{stock.symbol}</dd>
                     </dl>
-                    <dl className="fm w-20">
-                      <dd className="f3 fw6 ml0">{stock.name}</dd>
+                    <dl className="fl w-20">
+                      <dd className="f4 fw2 ml0">{stock.name}</dd>
                     </dl>
-                    <dl className="fm w-20">
-                      <dd className={`f3 fw6 ml0 `}>
+                    <dl className="fl w-20">
+                      <dd className={`f4 fw2 ml0 `}>
                         {stock.percent_change < 0 ? downArrow : upArrow}
                         {stock.percent_change}
                       </dd>
                     </dl>
-                    <dl className="fm w-20">
-                      <dd className="f3 fw6 ml0">{stock.price}</dd>
+                    <dl className="fl w-20">
+                      <dd className="f4 fw2 ml0">{stock.price}</dd>
                     </dl>
-                    <dl className="fm w-20">
-                      <dd className="f3 fw6 ml0">{stock.volume}</dd>
+                    <dl className="fl w-20">
+                      <dd className="f4 fw2 ml0">{stock.volume}</dd>
                     </dl>
                   </div>
                 );
