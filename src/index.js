@@ -1,63 +1,61 @@
 //import './assets/css/main.css';
+import "react-dropdown/style.css";
 
-import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import { ApolloProvider } from 'react-apollo';
-import { Route, BrowserRouter } from 'react-router-dom';
-import App from './App';
+import React, { Component } from "react";
+import ReactDOM from "react-dom";
+import { ApolloProvider } from "react-apollo";
+import { Route, BrowserRouter } from "react-router-dom";
+import App from "./App";
 
-import { ApolloClient } from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { ApolloLink } from 'apollo-link';
-import { withClientState } from 'apollo-link-state';
+import { ApolloClient } from "apollo-client";
+import { InMemoryCache } from "apollo-cache-inmemory";
+import { ApolloLink } from "apollo-link";
+import { withClientState } from "apollo-link-state";
 import { createHttpLink } from "apollo-link-http";
-import { CachePersistor } from "apollo-cache-persist"
-import { defaults, resolvers } from './graphql/UI';
-
+import { CachePersistor } from "apollo-cache-persist";
+import { defaults, resolvers } from "./graphql/ui";
 
 const cache = new InMemoryCache({
   logger: console.log,
-  loggerEnabled: true,
+  loggerEnabled: true
 });
 
 const persistor = new CachePersistor({
   cache,
   storage: window.sessionStorage,
-  debug: true,
-})
+  debug: true
+});
 
 const stateLink = withClientState({ resolvers, cache, defaults });
-const httpLink = createHttpLink({ uri: "https://api.graph.cool/simple/v1/cjflunf0n3ndi010089cphl2g" });
+const httpLink = createHttpLink({
+  uri: "https://api.graph.cool/simple/v1/cjflunf0n3ndi010089cphl2g"
+});
 
-const link = ApolloLink.from([
-  stateLink,
-  httpLink
-]);
+const link = ApolloLink.from([stateLink, httpLink]);
 
-const client = new ApolloClient({ cache, link })
+const client = new ApolloClient({ cache, link });
 
 class Root extends Component {
   constructor(props) {
-    super(props)
-    this.restoreState = this.restoreState.bind(this)
+    super(props);
+    this.restoreState = this.restoreState.bind(this);
     this.state = {
-      restored: false,
-    }
+      restored: false
+    };
   }
 
-  restoreState(){
-    this.setState({ restored: true })
+  restoreState() {
+    this.setState({ restored: true });
   }
 
   componentDidMount() {
-    persistor.restore()
-      .then(this.restoreState())
+    persistor.restore().then(this.restoreState());
   }
 
   render() {
-    let content = null
+    let content = null;
     if (!this.state.restored) {
-      content = <div>Loading</div>
+      content = <div>Loading</div>;
     } else {
       content = (
         <ApolloProvider client={client}>
@@ -65,14 +63,11 @@ class Root extends Component {
             <Route path="" component={App} />
           </BrowserRouter>
         </ApolloProvider>
-      )
+      );
     }
 
-    return content
+    return content;
   }
 }
 
-ReactDOM.render(
-  <Root />,
-  document.getElementById("root"),
-)
+ReactDOM.render(<Root />, document.getElementById("root"));
