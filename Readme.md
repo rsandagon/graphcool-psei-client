@@ -11,13 +11,13 @@
 1. Run `npm run build` to do production-ready build.
 
 ## Architecture
-1. Styles used Tychions.
+1. Styles used Tachyon.
 1. State handling are done with Apollo-Client's [Apollo-link-state](https://github.com/apollographql/apollo-link-state).
 
 ## Documentation
 
 - [React](https://facebook.github.io/react/)
-- [Tychion](https://tachyons.io)
+- [Tachyon](https://tachyons.io)
 - [Apollo GraphQL](https://www.apollographql.com/)
 
 ## License
